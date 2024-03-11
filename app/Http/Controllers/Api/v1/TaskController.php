@@ -19,12 +19,14 @@ class TaskController extends Controller
 //         return response()->json(['data' => TaskResource::collection(Task::orderBy('id')->cursorPaginate(5))]);
         try {
             $tasks = Task::orderBy('id')->cursorPaginate(5);
-
             if ($tasks->isEmpty()) {
                 return response()->json(['message' => 'No tasks found.']);
             }
-//            return response()->json(['data' => TaskResource::collection($tasks)]);
-            return response()->json($tasks);
+            return response()->json([
+                'message' => 'Tasks fetched successfully.',
+                'data' => TaskResource::collection($tasks)
+            ]);
+//            return response()->json($tasks);
         } catch (\Exception $e) {
             Log::error('Error fetching tasks: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch tasks.'], 500);
@@ -50,11 +52,14 @@ class TaskController extends Controller
             $validatedData['status_active']     = $validatedData['status_active'] ?? 1;
             $validatedData['is_delete']         = $validatedData['is_delete'] ?? 0;
             $task = Task::create($validatedData);
-            return response()->json(TaskResource::make($task), 201);
+            return response()->json([
+                'message'   => 'Task created successfully.',
+                'data'      =>TaskResource::make($task)
+            ], 201);
         } catch (\Exception $e)
         {
             Log::error('Error creating task: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to create task.'], 500);
+            return response()->json(['error' => 'Failed to create task.'.$e->getMessage()], 500);
         }
     }
 
@@ -64,7 +69,10 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         try {
-            return response()->json(TaskResource::make($task));
+            return response()->json([
+                    'message'   => 'Task fetched successfully.',
+                    'data'      => TaskResource::make($task)]
+            );
         } catch (\Exception $e) {
             Log::error('Error fetching task: ' . $e->getMessage());
             return response()->json(['error' => 'Failed to fetch task.'], 500);
@@ -84,14 +92,16 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task)
     {
-        // Update the task with the validated data from the request and return the updated task as a resource response with a 200 status code.
         try {
             $validatedData = $request->validated();
             $task->update($validatedData);
-            return response()->json(TaskResource::make($task));
+            return response()->json([
+                'message'   => 'Task updated successfully.',
+                'data'      =>TaskResource::make($task)
+            ]);
         } catch (\Exception $e) {
             Log::error('Error updating task: ' . $e->getMessage());
-            return response()->json(['error' => 'Failed to update task.'], 500);
+            return response()->json(['error' => 'Failed to update task.'.$e->getMessage()], 500);
         }
     }
 
@@ -100,6 +110,17 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        // Task is Delete
+         try {
+            $task->delete();
+            // return from resource collection
+            return response()->json([
+                'message' => 'Task deleted successfully.',
+                'data' => TaskResource::make($task)
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting task: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to delete task.'], 500);
+        }
     }
 }
