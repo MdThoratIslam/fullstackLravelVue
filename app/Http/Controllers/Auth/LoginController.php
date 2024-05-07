@@ -11,29 +11,25 @@ class LoginController extends Controller
     public function __invoke(LoginRequest $request)
     {
         try {
-
-            /*$user = User::where('email', $request->email)->first();
-            if (!$user || !Hash::check($request->password, $user->password))
-            {
-                throw ValidationException::withMessages([
-                    'email' => ['The provided credentials are incorrect.'],
-                ]);
-            }*/
-
+            // Attempt to authenticate the user
             if (!auth()->attempt($request->only('email', 'password'))) {
-//                return response()->json(['message' => 'The provided credentials are incorrect.'], 401);
-
-                throw ValidationException::withMessages([
-                    'email' => ['The provided credentials are incorrect.'],
-                ]);
+                // Return error response if authentication fails
+                return response()->json(['message' => 'Invalid login details'], 401);
             }
-
-
-
-
+            // Retrieve the authenticated user
+            $user = auth()->user();
+            // Create a new token for the authenticated user
+            $token = $user->createToken('auth_token')->plainTextToken;
+            // Return success response with user details and token
+            return response()->json([
+                'message' => 'User logged in successfully',
+                'user' => $user,
+                'token' => $token
+            ], 200);
         } catch (\Exception $e) {
+            // Return error response if an exception occurs
             return response()->json(['message' => $e->getMessage()], 500);
-
         }
     }
+
 }

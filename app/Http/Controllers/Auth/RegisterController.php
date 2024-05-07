@@ -15,11 +15,21 @@ class RegisterController extends Controller
     public function __invoke(RegisterRequest $request)
     {
         try {
-            User::create($request->getSanitizedData());
-            //$token = $user->createToken('auth_token')->plainTextToken;
-            //return response()->json(['token' => $token], 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
+            $data = User::create($request->getSanitizedData());
+            //$token = $data->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'message' => 'User created successfully',
+                'status' => 'success',
+                //'token' => $token,
+                'data' => $data
+            ], 201);
+        } catch (\Exception $e)
+        {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'status' => 'error'
+            ],
+                500);
         }
     }
 }
