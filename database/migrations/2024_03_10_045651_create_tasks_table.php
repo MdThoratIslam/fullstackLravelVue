@@ -17,7 +17,6 @@ return new class extends Migration
             $table->boolean('is_completed')->default(false);
             $table->string('status_active')->default(1);
             $table->string('is_delete')->default(0);
-
             $table->timestamps();
         });
     }

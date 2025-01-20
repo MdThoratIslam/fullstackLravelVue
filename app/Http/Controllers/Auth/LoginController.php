@@ -18,7 +18,6 @@ class LoginController extends Controller
             }
             // Retrieve the authenticated user
             $user = auth()->user();
-            // Create a new token for the authenticated user
             $token = $user->createToken('auth_token')->plainTextToken;
             // Return success response with user details and token
             return response()->json([
@@ -26,9 +25,14 @@ class LoginController extends Controller
                 'user' => $user,
                 'token' => $token
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Exception $e)
+
+        {
             // Return error response if an exception occurs
-            return response()->json(['message' => $e->getMessage()], 500);
+            return response()->json([
+                'message' => $e->getMessage(),
+                'error' => 'Failed to login'
+            ], 500);
         }
     }
 
